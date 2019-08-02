@@ -1,85 +1,45 @@
 //@flow
-//  NodeCameraModule.js
+//  NodePlayerModule.js
 //
 //  Created by Mingliang Chen on 2017/11/29.
 //  Upgraded by thiennguyen2428 on 2019/08/02.
 //  Copyright © 2017年 NodeMedia. All rights reserved.
 //
 
-import React, { PureComponent } from 'react'
+import React, { PureComponent } from "react"
 import {
   requireNativeComponent,
+  ViewPropTypes,
   UIManager,
-  findNodeHandle,
-  ViewPropTypes
-} from 'react-native'
+  findNodeHandle
+} from "react-native"
 
-type Camera = {
-  cameraId: 0 | 1,
-  cameraFrontMirror: boolean
-}
-type Audio = {
-  bitrate: number,
-  profile: 0 | 1 | 2,
-  samplerate: 8000 | 16000 | 32000 | 44100 | 48000
-}
-type Video = {
-  preset: number,
-  bitrate: number,
-  profile: 0 | 1 | 2,
-  fps: 15 | 20 | 24 | 30,
-  videoFrontMirror: boolean
-}
 type Props = {
-  outputUrl: string,
-  camera: Camera,
-  audio: Audio,
-  video: Video,
-  autopreview: boolean,
-  denoise: boolean,
-  smoothSkinLevel: 0 | 1 | 2 | 3 | 4 | 5,
+  inputUrl: string,
+  bufferTime: number,
+  maxBufferTime: number,
+  autoplay: boolean,
+  scaleMode: "ScaleToFill" | "ScaleAspectFit" | "ScaleAspectFill",
+  renderType: "SURFACEVIEW" | "TEXTUREVIEW",
   onStatus: Function,
   ...ViewPropTypes
 }
-class NodeCameraView extends PureComponent<Props> {
-  name: string = "NodeCameraView"
+
+class NodePlayerView extends PureComponent<Props> {
+  name: string = "NodePlayerView"
   videoRef: any = React.createRef()
 
-  onChange = (event: Object) => {
+  onChange = (event) => {
     if (!this.props.onStatus) {
       return
     }
     this.props.onStatus(event.nativeEvent.code, event.nativeEvent.message)
   }
 
-  switchCamera() {
+  pause() {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.switchCamera,
-      null
-    )
-  }
-
-  flashEnable(enable) {
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.flashEnable,
-      [enable]
-    )
-  }
-
-  startPreview() {
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.startprev,
-      null
-    )
-  }
-
-  stopPreview() {
-    UIManager.dispatchViewManagerCommand(
-      findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.stopprev,
+      UIManager.RCTNodePlayer.Commands.pause,
       null
     )
   }
@@ -87,7 +47,7 @@ class NodeCameraView extends PureComponent<Props> {
   start() {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.start,
+      UIManager.RCTNodePlayer.Commands.start,
       null
     )
   }
@@ -95,24 +55,24 @@ class NodeCameraView extends PureComponent<Props> {
   stop() {
     UIManager.dispatchViewManagerCommand(
       findNodeHandle(this.videoRef.current),
-      UIManager.RCTNodeCamera.Commands.stop,
+      UIManager.RCTNodePlayer.Commands.stop,
       null
     )
   }
 
   render() {
     return (
-      <RCTNodeCamera
+      <RCTNodePlayer
         {...this.props}
-        ref={this.videoRef}
+        ref={RCT_VIDEO_REF}
         onChange={this.onChange}
       />
     )
   }
 }
 
-const RCTNodeCamera = requireNativeComponent("RCTNodeCamera", NodeCameraView, {
+const RCTNodePlayer = requireNativeComponent("RCTNodePlayer", NodePlayerView, {
   nativeOnly: { onChange: true }
 })
 
-export default NodeCameraView
+export default NodePlayerView
